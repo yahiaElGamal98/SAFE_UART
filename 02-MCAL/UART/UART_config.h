@@ -9,6 +9,8 @@
 #ifndef UART_CONFIG_H_
 #define UART_CONFIG_H_
 
+
+
 /*
 BAUD RATE OPTIONS: *(DOUBLE SPEED Ux2 turned off)*
 BAUD     NUMBER
@@ -20,8 +22,9 @@ BAUD     NUMBER
 28.8k    16
 38.4k    12
 */
-
 #define BAUD_RATE 51  //9600 default
+
+
 
 /*
 PARITY OPTIONS
@@ -29,17 +32,21 @@ DISABLED -> 0
 EVEN -> 2
 ODD -> 3 
 */
-
 #define PARITY_MODE 0 //disabled by default
+
+
 
 /*
 STOP BIT OPTIONS
 1Bit -> 0
 2Bits -> 1
 */
-
 #define STOP_MODE 0  //1 Bit by default
+
+
+
 /*
+RECEIVE COMPLETE INTERRUPT OPTIONS: 
 ON -> 1
 OFF -> 0
 */
