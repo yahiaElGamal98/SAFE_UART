@@ -46,13 +46,24 @@ void setRxCompleteCallback(void (*callback)(void))
 {
 	RxCompleteCallback=callback;
 }
-void UART_receiveChar(uint8_t* u8_val)
+EN_ErrorStatus_t UART_receiveChar(void* pvid_val)
 {
-	while(LOW==((UCSRA&(HIGH<<RXC))>>RXC))
+	EN_ErrorStatus_t EN_loc_error;
+	if(NULL_PTR!=pvid_val)
 	{
-		//WAIT FOR RECEIVE COMPLETE FLAG
+		while(LOW==((UCSRA&(HIGH<<RXC))>>RXC))
+		{
+			//WAIT FOR RECEIVE COMPLETE FLAG
+		}
+		*((uint8_t*)pvid_val)=UDR;
+		 EN_loc_error=EOK;
 	}
-	*u8_val=UDR;
+	else
+	{
+		 EN_loc_error=ENOK;
+	}
+	return  EN_loc_error;
+	
 }
 void UART_sendChar(uint8_t u8_char)
 {
@@ -62,39 +73,61 @@ void UART_sendChar(uint8_t u8_char)
 	}
 	UDR=u8_char;
 }
-void UART_sendString(uint8_t* u8_str)
+EN_ErrorStatus_t UART_sendString(const void* pvid_str)
 {
-	uint8_t u8_index=0;
-	//continue sending till you meet any terminating character
-	while((NULL!=u8_str[u8_index])&&(CARRIAGE_RETURN!=u8_str[u8_index])&&(NEW_LINE!=u8_str[u8_index]))
+	EN_ErrorStatus_t EN_loc_error;
+	if(NULL_PTR!=pvid_str)
 	{
-		UART_sendChar(u8_str[u8_index]);
-		u8_index++;
-	}
-}
-void UART_receiveString(uint8_t* u8_retStr)
-{
-	uint8_t u8_index=0;
-	//max length of received string is 255 as per requirements
-	while(u8_index<MAX_CHAR)
-	{
-		UART_receiveChar(&u8_retStr[u8_index]);
-		//continue receiving till you meet a terminating character
-		if(NULL==u8_retStr[u8_index] ||NEW_LINE==u8_retStr[u8_index] ||CARRIAGE_RETURN==u8_retStr[u8_index])
+		uint8_t u8_index=0;
+		uint8_t *pu8_str=(uint8_t*)pvid_str;
+		//continue sending till you meet any terminating character
+		while((NULL!=pu8_str[u8_index])&&(CARRIAGE_RETURN!=pu8_str[u8_index])&&(NEW_LINE!=pu8_str[u8_index]))
 		{
-			//replace that character with NULL
-			u8_retStr[u8_index]=NULL;
-			break;
-		}
-		//force exit and terminate with NULL if MAX SIZE reached
-		else if ((MAX_CHAR-1)==u8_index)
-		{
-			u8_retStr[u8_index]=NULL;
-			break;
-		}
-		else
-		{
+			UART_sendChar(pu8_str[u8_index]);
 			u8_index++;
 		}
+		EN_loc_error=EOK;
 	}
+	else
+	{
+		EN_loc_error=ENOK;
+	}
+	return EN_loc_error;
+}
+EN_ErrorStatus_t UART_receiveString(void* pvid_str)
+{
+	EN_ErrorStatus_t EN_loc_error;
+	if(NULL_PTR!=pvid_str)
+	{
+		uint8_t u8_index=0;
+		uint8_t *pu8_str = (uint8_t*)pvid_str;
+		//max length of received string is 255 as per requirements
+		while(u8_index<MAX_CHAR)
+		{
+			UART_receiveChar((void*)(&pu8_str[u8_index]));
+			//continue receiving till you meet a terminating character
+			if((NULL==pu8_str[u8_index]) ||(NEW_LINE==pu8_str[u8_index]) ||(CARRIAGE_RETURN==pu8_str[u8_index]))
+			{
+				//replace that character with NULL
+				pu8_str[u8_index]=NULL;
+				break;
+			}
+			//force exit and terminate with NULL if MAX SIZE reached
+			else if ((MAX_CHAR-1)==u8_index)
+			{
+				pu8_str[u8_index]=NULL;
+				break;
+			}
+			else
+			{
+				u8_index++;
+			}
+		}
+		EN_loc_error=EOK;
+	}
+	else
+	{
+		EN_loc_error=ENOK;
+	}
+	return  EN_loc_error;	
 }
